@@ -1,0 +1,38 @@
+[common]
+version = "0.0.1"
+is_debug = true
+log_level = "DEBUG"
+log_path = "./out.log"
+
+[apns]
+
+# APNS的集群机器数，必须等全部apns节点启动后，apns才能对外服务
+# 启动等待的目的是为了保证数据复制的一致性
+cluster_servers = 1
+
+
+
+[etcd]
+addrs = [ 
+ 
+        
+]
+
+apns_addrs = "/gomqtt/apns/etcd/addrs"
+
+
+[nats]
+addrs = [
+ 	
+   
+        
+]
+
+pub_apns_topic = "pub_apns_topic"
+pub_apns_group = "pub_apns_group"
+
+set_token_topic = "set_token_topic"
+set_token_group = "set_token_group"
+
+del_token_topic = "del_token_topic"
+del_token_group = "del_token_group"

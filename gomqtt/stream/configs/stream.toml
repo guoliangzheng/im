@@ -1,0 +1,21 @@
+[common]
+version = "0.1.0"
+is_debug = true
+log_level = "info"
+log_path = "./out.log"
+
+[etcd]
+#addrs = ["127.0.0.1:2379"]
+addrs = []
+dltimeout = 10
+rqtimeout = 10
+report_time = 5
+report_dir = "/gomqtt/stream/etcd/reportdir"
+ttl = 15
+
+[grpc]
+addr = ""
+port = "8389"
+
+[nats]
+addrs = []

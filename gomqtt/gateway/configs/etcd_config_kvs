@@ -1,0 +1,85 @@
+etcd
+
+TomlConfigKey           EtcdKey                                        EtcdValue                Desc
+
+# common
+version                 /gomqtt/gateway/version                       0.0.1
+
+
+is_debug                /gomqtt/gateway/isdebug                        true
+
+
+log_level               /gomqtt/gateway/loglevel                       DEBUG 
+
+
+log_path                /gomqtt/gateway/logpath                         ./out.log
+
+
+# gateway
+web_domain              /gomqtt/gateway/webdomain                       ''
+
+
+server_id              /gomqtt/gateway/serverid/1                      1                    (这个是服务器的唯一id，本示例server_id=1) 
+
+
+nats_addrs              /gomqtt/gateway/natsaddrs/1                   nats://10.7.14.236:4222   共2个nats节点，该Key为列表形式
+                        /gomqtt/gateway/natsaddrs/2                   nats://10.7.14.26:4222
+
+
+# provider
+invoked                /gomqtt/gateway/invoked/1                      tcp                      
+                        /gomqtt/gateway/invoked/1                      websocket
+
+
+enable_tls               /gomqtt/gateway/enabletls                      false
+
+
+tls_cert                 /gomqtt/gateway/tlscert                       configs/cert.pem
+
+
+tls_key                 /gomqtt/gateway/tlskey                          configs/key.pem
+
+
+ws_addr                 /gomqtt/gateway/wsaddr                          :8994
+
+
+# etcd
+addrs                   /gomqtt/gateway/etcdaddrs/1                     10.7.24.191:2379
+                        /gomqtt/gateway/etcdaddrs/2                     10.7.24.192:2379
+
+
+streams                 /gomqtt/gateway/etcd/streams                    /gomqtt/stream/etcd/reportdir/
+
+
+rooms                    /gomqtt/gateway/etcd/rooms                      /gomqtt/room/etcd/addrs
+
+
+# mqtt
+qos_max                 /gomqtt/gateway/qosmax                          1
+
+
+default_keepalive       /gomqtt/gateway/defaultkeepalive                60
+
+
+min_keepalive           /gomqtt/gateway/minkeepalive                    20
+
+
+max_keepalive           /gomqtt/gateway/maxkeepalive                    120
+
+
+max_user_len           /gomqtt/gateway/maxuserlen                       40
+
+
+max_password_len        /gomqtt/gateway/maxpasswordlen                  40
+
+
+# dispatch
+addr                    /gomqtt/gateway/dispatch/addr                   :8906
+
+
+# mutex
+type                    /gomqtt/gateway/mutex/type                      1
+
+
+                
+        

@@ -1,0 +1,476 @@
+# 安装
+
+Getting the bits, bit by bit
+
+---
+
+## Etcd
+现代化的服务发现，可以替代Zookeeper 
+
+<br >
+#### 下载
+
+    https://github.com/coreos/etcd/releases/ 在这里下载对应的最新版本的etcd zip包
+
+<br />
+
+
+#### 启动
+
+##### 单节点
+
+    ./bin/etcd
+
+<br />
+
+
+##### 集群
+
+1. 节点组成(2个):
+
+    10.7.24.191
+
+    10.7.24.192
+
+
+2. 申请集群ID:
+
+    这个是Etcd提供的方式：我们去访问etcd的官方网站获取一个集群id，然后启动节点时，通过该集群id，来完成集群之间的互通。**注意，务必保证etcd所在的服务节点可以访问etcd的官网！！！** 如果没有网络条件，可以去官方文档查看相应的启动方式。
+
+        >curl https://discovery.etcd.io/new?size=2
+        >https://discovery.etcd.io/4b8d03d4630e134b7df4298ecb2f59c4
+    
+
+    4b8d03d4630e134b7df4298ecb2f59c4就是我们需要的id
+
+
+3. 启动集群
+
+    首先启动第一个节点：
+
+        >nohup etcd --name test1 --initial-advertise-peer-urls http://10.7.24.191:2380 --listen-peer-urls http://10.7.24.191:2380 --listen-client-urls http://10.7.24.191:2379,http://127.0.0.1:2379 --advertise-client-urls http://10.7.24.191:2379 --discovery https://discovery.etcd.io/4b8d03d4630e134b7df4298ecb2f59c4 --data-dir /data/etcd >> /data/etcd/out.log 2>&1 &
+    
+
+    注意，这里我们使用了自定义的节点名--name，使用了节点ip和集群id
+
+    <br />
+
+    接着启动第二个：
+
+        >nohup etcd --name test2 --initial-advertise-peer-urls http://10.7.24.192:2380 --listen-peer-urls http://10.7.24.192:2380 --listen-client-urls http://10.7.24.192:2379,http://127.0.0.1:2379 --advertise-client-urls http://10.7.24.192:2379 --discovery https://discovery.etcd.io/4b8d03d4630e134b7df4298ecb2f59c4 --data-dir /data/etcd >> /data/etcd/out.log 2>&1 &
+        
+    <br />
+
+    使用etcdctl查看集群是否启动成功:
+   
+        > etcdctl --endpoints="http://10.7.24.191:2379,http://10.7.24.192:2379" cluster-health
+        member 1f59512b5b6bc5f8 is healthy: got healthy result from http://10.7.24.191:2379
+        member 78729fe03d1abdd3 is healthy: got healthy result from http://10.7.24.192:2379
+        cluster is healthy
+
+    --endpoints表示要访问的集群地址，etcdctl可以远程访问集群
+
+<br />
+
+#### 注意事项
+
+    集群id一旦使用过，且中间有任何失败，请重新申请
+
+
+
+## Nats
+现代化的超高性能、超稳定的MQ服务，详见nats.io
+
+<br />
+#### 下载
+https://github.com/nats-io/gnatsd/releases 下载最新版本
+
+<br />
+
+#### 启动
+
+##### 单节点
+
+```
+./gnatsd -p 42222 -m 8222
+```
+
+-p代表gnatsd监听的tcp端口，-m是监控monitor服务的端口
+
+<br />
+
+##### 集群
+
+1. 节点组成(3个)：
+
+    10.10.0.1
+
+    10.10.0.2
+
+    10.10.0.3
+
+2. 启动集群
+
+    启动第一个节点：
+
+        gnatsd -p 4222 -m 82222 -cluster nats://10.10.0.1:5222 -routes nats://10.10.0.2:5222,nats://10.10.0.3:5222
+
+
+    启动第二个:
+
+        gnatsd -p 4222 -m 82222 -cluster nats://10.10.0.2:5222 -routes nats://10.10.0.1:5222,nats://10.10.0.3:5222
+
+
+    启动第三个:
+
+        gnatsd -p 4222 -m 82222 -cluster nats://10.10.0.3:5222 -routes nats://10.10.0.1:5222,nats://10.10.0.2:5222
+
+
+    全部节点启动完毕，验证一下：
+
+        curl http://10.10.0.1:8222/routez
+
+
+
+
+
+<br />
+
+
+## TiDB
+TiDB是NewSQL的践行者，是谷歌F1+Spanner的开源实现
+
+<br />
+
+
+#### 下载
+
+##### Linux (CentOS 7+, Ubuntu 14.04+)
+
+```bash
+# 下载压缩包
+wget http://download.pingcap.org/tidb-latest-linux-amd64.tar.gz
+wget http://download.pingcap.org/tidb-latest-linux-amd64.sha256
+
+# 检查文件完整性，返回 ok 则正确
+sha256sum -c tidb-latest-linux-amd64.sha256
+
+# 解开压缩包
+tar -xzf tidb-latest-linux-amd64.tar.gz
+cd tidb-latest-linux-amd64
+```
+###### CentOS 6（不推荐）
+
+```bash
+# 下载 CentOS6 压缩包
+wget http://download.pingcap.org/tidb-latest-linux-amd64-centos6.tar.gz
+wget http://download.pingcap.org/tidb-latest-linux-amd64-centos6.sha256
+
+# 检查文件完整性，返回 ok 则正确
+sha256sum -c tidb-latest-linux-amd64-centos6.sha256
+
+# 解开压缩包
+tar -xzf tidb-latest-linux-amd64-centos6.tar.gz
+cd tidb-latest-linux-amd64-centos6
+```
+
+<br />
+
+#### 部署
+
+##### 单节点方式快速部署
+
+我们可以在单机上面，运行和测试 TiDB 集群，请按如下步骤**依次启动** PD，TiKV，TiDB：
+    
+
+```bash
+./bin/pd-server --data-dir=pd
+```
+
+```bash
+./bin/tikv-server --pd="127.0.0.1:2379" \
+--store=tikv
+```
+
+
+```bash
+./bin/tidb-server --store=tikv \
+--path="127.0.0.1:2379"
+```
+
+使用官方的 `mysql` 客户端连接 TiDB.
+
+```sh
+mysql -h 127.0.0.1 -P 4000 -u root -D test
+```
+
+<br />
+
+##### 多节点集群模式部署
+
+在生产环境中，我们推荐多节点部署 TiDB 集群。
+
+这里我们使用六个节点，部署三个 PD，三个 TiKV，以及一个 TiDB，各个节点以及所运行服务信息如下：
+
+|Name|Host IP|Services|
+|----|-------|--------|
+|node1|192.168.199.113|PD1, TiDB|
+|node2|192.168.199.114|PD2|
+|node3|192.168.199.115|PD3|
+|node4|192.168.199.116|TiKV1|
+|node5|192.168.199.117|TiKV2|
+|node6|192.168.199.118|TiKV3|
+
+请按如下步骤**依次启动** PD 集群，TiKV 集群以及 TiDB：
+
+1.在 node1，node2，node3 启动 PD.
+
+```bash
+./bin/pd-server --name=pd1 \
+--data-dir=pd1 \
+--client-urls="http://192.168.199.113:2379" \
+--peer-urls="http://192.168.199.113:2380" \
+--initial-cluster="pd1=http://192.168.199.113:2380,pd2=http://192.168.199.114:2380,pd3=http://192.168.199.115:2380"
+./bin/pd-server --name=pd2 \
+--data-dir=pd2 \
+--client-urls="http://192.168.199.114:2379" \
+--peer-urls="http://192.168.199.114:2380" \
+--initial-cluster="pd1=http://192.168.199.113:2380,pd2=http://192.168.199.114:2380,pd3=http://192.168.199.115:2380"
+./bin/pd-server --name=pd3 \
+--data-dir=pd3 \
+--client-urls="http://192.168.199.115:2379" \
+--peer-urls="http://192.168.199.115:2380" \
+--initial-cluster="pd1=http://192.168.199.113:2380,pd2=http://192.168.199.114:2380,pd3=http://192.168.199.115:2380"
+```
+
+2.在 node4，node5，node6 启动 TiKV.
+
+```bash
+./bin/tikv-server --pd="192.168.199.113:2379,192.168.199.114:2379,192.168.199.115:2379" \
+--addr="192.168.199.116:20160" \
+--store=tikv1
+./bin/tikv-server --pd="192.168.199.113:2379,192.168.199.114:2379,192.168.199.115:2379" \
+--addr="192.168.199.117:20160" \
+--store=tikv2
+./bin/tikv-server --pd="192.168.199.113:2379,192.168.199.114:2379,192.168.199.115:2379" \
+--addr="192.168.199.118:20160" \
+--store=tikv3
+```
+
+3.在 node1 启动 TiDB.
+
+```bash
+./bin/tidb-server --store=tikv \
+--path="192.168.199.113:2379,192.168.199.114:2379,192.168.199.115:2379"
+```
+
+4.使用官方 `mysql` 客户端连接 TiDB.
+
+```sh
+mysql -h 192.168.199.113 -P 4000 -u root -D test
+```
+
+<br />
+
+##### 功能性测试部署
+
+如果只是对 TiDB 进行测试，并且机器数量有限，我们可以只启动一台 PD 测试 整个集群。
+
+这里我们使用四个节点，部署一个 PD，三个 TiKV，以及一个 TiDB，各个节点以及所运行服务信息如下：
+
+|Name|Host IP|Services|
+|----|-------|--------|
+|node1|192.168.199.113|PD1, TiDB|
+|node2|192.168.199.114|TiKV1|
+|node3|192.168.199.115|TiKV2|
+|node4|192.168.199.116|TiKV3|
+
+
+请按如下步骤**依次启动** PD 集群，TiKV 集群以及 TiDB：
+
+1.在 node1 启动 PD.
+
+```bash
+./bin/pd-server --name=pd1 \
+--data-dir=pd1 \
+--client-urls="http://192.168.199.113:2379" \
+--peer-urls="http://192.168.199.113:2380" \
+--initial-cluster="pd1=http://192.168.199.113:2380"
+```
+
+2.在 node2，node3，node4 启动 TiKV.
+
+```bash
+./bin/tikv-server --pd="192.168.199.113:2379" \
+--addr="192.168.199.114:20160" \
+--store=tikv1
+./bin/tikv-server --pd="192.168.199.113:2379" \
+--addr="192.168.199.115:20160" \
+--store=tikv2
+./bin/tikv-server --pd="192.168.199.113:2379" \
+--addr="192.168.199.116:20160" \
+--store=tikv3
+```
+
+3.在 node1 启动 TiDB.
+
+```bash
+./bin/tidb-server --store=tikv \
+--path="192.168.199.113:2379"
+```
+
+4.使用官方 `mysql` 客户端连接 TiDB.
+
+```sh
+mysql -h 192.168.199.113 -P 4000 -u root -D test
+```
+
+<br />
+##### 动态添加节点
+
+###### PD
+
+我们可以使用 `join` 参数，方便的将一个 PD 服务加入到现有的 PD 集群里面。假设现在我们有三个 PD 服务，详细信息如下：
+
+|Name|ClientUrls|PeerUrls|
+|----|----------|--------|
+|pd1|http://host1:2379|http://host1:2380|
+|pd2|http://host2:2379|http://host2:2380|
+|pd3|http://host3:2379|http://host3:2380|
+
+如果我们需要添加 `pd4`，只需要在 `join` 参数里面填入当前 PD 集群某一个 PD 服务的 `ClientUrls` 就可以了，如下：
+
+```
+./bin/pd-server --name=pd4 \
+--client-urls="http://host4:2379"
+--peer-urls="http://host4:2380"
+--join="http://host1:2379"
+```
+
+<br />
+###### TiKV
+
+动态新加入一个新的 TiKV 服务是非常容易的，我们可以直接启动一个 TiKV 服务，PD 会自动检测到，
+并开始做整个集群的 balance，将其他 TiKV 的数据移动到新加入的 TiKV 里面。
+
+我们也能够显式的告诉 PD 去删除某个 TiKV。PD 会先把这个 TiKV 标记为正在下线的状态，
+然后把这个 TiKV 上的数据均匀地迁移到其他 TiKV 上面。当这个 TiKV 上的数据已经迁移
+完了，PD 会把这个 TiKV 标记为完成下线的状态，这时候就可以安全地把这个 TiKV 从集
+群中去掉。
+
+假设我们要删除一个 store id 为 1 的 TiKV，可以调用 PD 的 HTTP API 来操作：
+
+```
+curl -X DELETE http://host:port/pd/api/v1/store/1
+```
+
+然后可以查看这个 TiKV 的当前状态：
+
+```
+curl http://host:port/pd/api/v1/store/1
+```
+
+如果这个 TiKV 正在下线，对应的 state=1，如果这个 TiKV 完成下线，对应的 state=2，
+否则 state=0。
+
+更详细的 API 文档可以参考 [PD APIv1](https://cdn.rawgit.com/pingcap/docs/master/op-guide/pd-api-v1.html)。
+
+<br />
+###### TiDB 
+
+TiDB 是一个无状态的服务，这也就意味着我们能直接添加和删除 TiDB。需要注意的是如果我们在 TiDB 的服务的前面搭建了一个 proxy（譬如 HAProxy），我们需要更新 proxy 的配置并重新载入。
+
+
+<br />
+
+## Gomqtt平台
+请按照文档顺序来启动各个节点(首先需要启动Etcd、Nats，如果需要使用持久化存储，还要启动TiDB)
+
+Stream、Gateway、Center、Apns的静态配置文件都在configs/底下，例如stream.toml,gateway.toml等
+
+首先是下载项目
+```
+go get -v -u github.com/aiyun/gomqtt
+```
+
+<br />
+###Stream
+
+#####安装
+
+```
+cd gomqtt/stream
+go build
+```
+
+<br />
+#####配置
+修改stream.toml中的etcd.addrs和nats.addrs为你的集群地址
+
+如果要启动持久化存储，则设置enalbe_persist=true，并修改tidb.addrs
+
+<br />
+
+#####启动
+```
+./stream -c
+```
+重复该步骤多次，直到启动所有stream节点
+
+<br />
+
+###Gateway
+
+#####安装
+```
+cd gomqtt/gateway
+go build
+```
+<br />
+
+#####配置
+假设要启动三台gateway
+首先修改service_id,三个节点依次为1、2、3,id切不可相同。
+修改nats_addrs和etcd.addrs
+
+<br />
+
+#####启动
+```
+./gateway -c
+```
+
+<br />
+
+
+###Center
+#####安装
+```
+cd gomqtt/center
+go build
+```
+
+<br />
+
+#####配置
+修改etcd.addrs
+
+<br />
+
+#####启动
+```
+./center -c
+```
+
+<br />
+
+###Apns
+#####安装
+```
+cd gomqtt/apns
+go build
+```
+<br />
+
+#####配置
+修改nats.addrs，如果要开启持久化存储，则设置enalbe_persist=true，并修改tidb.addrs

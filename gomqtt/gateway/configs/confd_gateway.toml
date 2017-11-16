@@ -1,0 +1,39 @@
+[template]
+src = "confd_gateway.conf.tmpl"
+dest = "/etc/gomqtt/gateway.toml"
+keys = [
+        "/gomqtt/gateway/version",
+        "/gomqtt/gateway/isdebug",
+        "/gomqtt/gateway/loglevel",
+        "/gomqtt/gateway/logpath",
+        
+        "/gomqtt/gateway/webdomain",
+        "/gomqtt/gateway/serverid/1",
+        "/gomqtt/gateway/natsaddrs",
+        
+        "/gomqtt/gateway/invoked",
+        "/gomqtt/gateway/tcpaddr",
+        "/gomqtt/gateway/enabletls",
+        "/gomqtt/gateway/tlscert",
+        "/gomqtt/gateway/tlskey",
+        "/gomqtt/gateway/wsaddr",
+        
+
+	"/gomqtt/gateway/etcdaddrs",
+	"/gomqtt/gateway/etcd/streams",
+        "/gomqtt/gateway/etcd/rooms",
+
+        "/gomqtt/gateway/qosmax",
+        "/gomqtt/gateway/defaultkeepalive",
+         "/gomqtt/gateway/minkeepalive",
+          "/gomqtt/gateway/maxkeepalive",
+        "/gomqtt/gateway/maxuserlen",
+        "/gomqtt/gateway/maxpasswordlen",
+
+        "/gomqtt/gateway/dispatch/addr",
+        
+        "/gomqtt/gateway/mutex/type",
+
+        
+]
+reload_cmd = "/Users/sunfei/Documents/GoLibs/src/github.com/aiyun/gomqtt/gateway/gateway reload"

@@ -1,0 +1,268 @@
+// protoc -I proto/ proto/rpc.proto --go_out=plugins=grpc:proto
+
+syntax = "proto3";
+
+package proto;
+
+// 
+// center to stream 和 gateway to stream的数据都是单条的
+// stream to gateway 的数据都是按多条发送的，就是下面各类信息体的的打包类型结构
+// 
+
+
+service Rpc {
+ 
+    // 用户登陆相关接口
+    rpc Login (LoginMsg)        returns (LoginRet) 	{}
+    rpc Logout (LogoutMsg)      returns (LogoutRet) {}
+
+    // 用户订阅相关
+    rpc Subscribe (SubMsg)      returns (SubRet) 	{}
+    rpc UnSubscribe (UnSubMsg)  returns (UnSubRet) 	{}
+
+    // 用户发布
+    rpc PubText(PubTextMsg)     returns (PubTextRet) {}
+    rpc PubJson(PubJsonMsg)     returns (PubJsonRet) {}
+    rpc PubAck(PubAckMsg)       returns (PubAckRet)  {}
+
+}
+
+// 推送Json消息结构
+message PubJsonMsg {
+    bytes  fAcc    = 1;      // f accound
+    bytes  ftp     = 2;      // f topic 
+    bytes  toAcc   = 3;      // to accound
+    bytes  ttp     = 4;      // to topic 
+    int32  qos     = 5;      // Qos
+    int32  msgType = 6;      // 消息功能
+    bytes  mid     = 7;      // msgid
+    bytes  msg     = 8;      // 用户push信息
+    bytes  AppID   = 9;      // AppID,如果是设置系统消息，ftp不一定是是用户的appid，所以这里需要再带一个appid
+}
+
+
+// 推送Json消息结构返回结果
+message PubJsonRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+
+// 推送text消息结构
+message PubTextMsg {
+    bytes  fAcc    = 1;      // f accound
+    bytes  ftp     = 2;      // f topic 
+    bytes  toAcc   = 3;      // to accound
+    bytes  ttp     = 4;      // to topic 
+    int32  qos     = 5;      // Qos
+    int32  msgType = 6;      // 消息功能
+    bytes  mid     = 7;      // msgid
+    bytes  msg     = 8;      // 用户push信息 
+}
+
+
+// 推送text消息结构返回结果
+message PubTextRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+
+// 消息Ack
+message PubAckMsg {
+                bytes         acc  = 1;  // acc
+                int32         plty = 2;  // 登陆协议方式
+    repeated    AckTopicMsgID mids = 3;  // 消息ID列表
+}
+
+message AckTopicMsgID {
+    bytes tp  = 1;
+    bytes mid = 2;
+}
+
+
+// 消息Ack消息结构返回结果
+message PubAckRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+// 广播
+message BPushMsg {
+    bytes  tp       = 1;        // topic
+    int64  rt       = 2;        // 接到消息时间
+    int64  ttl      = 3;        // 消息到期时间
+    bytes  mid      = 4;        // 消息id
+    bytes  lb       = 8;        // 标签
+    bytes  ij       = 9;        // iosjson          
+    bytes  msg      = 7;        // 消息内容
+}
+
+// 广播打包结构
+message BPushMsgs {
+    repeated BPushMsg msgs = 1;         //数据包
+}
+
+
+// 单播
+message SPushMsg {
+    repeated    bytes  tts      = 1;        // 目标主题列表
+    repeated    bytes  tus      = 2;        // 目标用户列表
+                bytes  ft       = 3;        // 来源主题
+                bytes  fu       = 4;        // 来源用户 
+                int64  rt       = 5;        // 接到消息时间
+                int64  ttl      = 6;        // 消息到期时间
+                bytes  mid      = 7;        // 消息id
+                bytes  lb       = 8;        // 标签
+                bytes  ij       = 9;        // iosjson        
+                bytes  msg      = 10;       // 消息内容
+}
+
+// 单播打包结构
+message SPushMsgs {
+    repeated SPushMsg msgs = 1;         //数据包
+}
+
+
+// 私聊
+message PChatMsg {
+    bytes  tp       = 1;        // 目标主题
+    bytes  tu       = 2;        // 目标用户
+    bytes  ft       = 3;        // 来源主题
+    bytes  fu       = 4;        // 来源用户
+    int64  rt       = 5;        // 接到消息时间
+    int64  ttl      = 6;        // 消息到期时间
+    bytes  mid      = 7;        // 消息id
+    bytes  lb       = 8;        // 标签
+    bytes  ij       = 9;        // iosjson       
+    bytes  msg      = 10;       // 消息内容
+}
+
+// 私聊打包结构
+message PChatMsgs {
+    repeated PChatMsg msgs = 1;         //数据包
+}
+
+// 群聊
+message GChatMsg {
+    bytes msg = 1;
+}
+
+// 群聊打包结构
+message GChatMsgs {
+    repeated GChatMsg msgs = 1;         //数据包
+}
+
+// 登陆消息
+message LoginMsg {
+    bytes  acc        = 1;      // 账户名
+    bytes  appID      = 2;      // appid
+    int32  pT         = 3;      // payload协议类型
+    int64  cid        = 4;      // 链接id
+    bytes  gip        = 5;      // gateway ip地址
+    repeated Topic ts = 6;      // topic列表
+}
+
+// 登陆消息返回消息
+message LoginRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+// 登出消息
+message LogoutMsg {
+    bytes  acc        = 1;      // 账户名
+    bytes  appID      = 2;      // appid
+}
+
+// 登出消息返回消息
+message LogoutRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+message Topic {
+    int32 qos = 1;  // 订阅等级
+    bytes tp  = 2;  // 订阅主题
+    int32 ty  = 3;  // 主题类型
+}
+
+// 订阅主题消息
+message SubMsg {
+             bytes  acc        = 1;      // 账户名
+             bytes  appID      = 2;      // appid
+    repeated Topic  ts         = 3;      // topic列表
+}
+
+// 订阅主题消息返回消息
+message SubRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+// 取消订阅主题消息
+message UnSubMsg {
+             bytes  acc        = 1;      // 账户名
+             bytes  appID      = 2;      // appid
+    repeated Topic  ts         = 3;      // topic列表
+}
+
+
+// 取消订阅主题消息返回消息
+message UnSubRet {
+    bool  r = 1;    //  true 成功， false 失败
+    bytes m = 2;    //  失败原因
+}
+
+// 广播返回消息
+message BPushRet {
+    bytes msg = 1;
+}
+
+// 单播返回消息
+message SPushRet {
+    bytes msg = 1;
+}
+
+// 私聊返回消息
+message PChatRet {
+    bytes msg = 1;
+}
+
+
+// 群播返回消息 
+message GChatRet {
+    bytes msg = 1;
+}
+
+// 设置Nick
+message NickMsg {
+    bytes msg = 1;
+}
+
+// 设置Nick返回消息
+message NickRet {
+    bytes msg = 1;
+}
+
+// 设置Apns
+message ApnsMsg {
+    bytes msg = 1;
+}
+
+// 设置Apns返回消息
+message ApnsRet {
+    bytes msg = 1;
+}
+
+
+
+// Label
+message LabelMsg {
+    repeated bytes msg = 1;
+}
+
+// 设置Label返回消息
+message LabelRet {
+    bytes msg = 1;
+}

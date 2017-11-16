@@ -1,0 +1,62 @@
+[common]
+version = "{{getv "/gomqtt/gateway/version"}}"
+is_debug = {{getv "/gomqtt/gateway/isdebug"}}
+log_level = "{{getv "/gomqtt/gateway/loglevel"}}"
+log_path = "{{getv "/gomqtt/gateway/logpath"}}"
+
+
+[gateway]
+web_domain = "{{getv "/gomqtt/gateway/webdomain"}}"
+
+# server_id need to be global unique,because it is used in uuid generate
+server_id = {{getv "/gomqtt/gateway/serverid/1"}}
+nats_addrs = [
+ 	{{range getvs "/gomqtt/gateway/natsaddrs/*"}}
+        "{{.}}",
+        {{end}}
+]
+
+[provider]
+invoked = [
+        {{range getvs "/gomqtt/gateway/invoked/*"}}
+        "{{.}}",
+        {{end}}
+]
+
+#  tcp provider
+tcp_addr = "{{getv "/gomqtt/gateway/tcpaddr"}}"
+#tls related
+enable_tls = {{getv "/gomqtt/gateway/enabletls"}}
+tls_cert = "{{getv "/gomqtt/gateway/tlscert"}}"
+tls_key = "{{getv "/gomqtt/gateway/tlskey"}}"
+ws_addr =  "{{getv "/gomqtt/gateway/wsaddr"}}"
+
+[etcd]
+addrs = [
+ 	{{range getvs "/gomqtt/gateway/etcdaddrs/*"}}
+        "{{.}}",
+        {{end}}
+]
+streams = "{{getv "/gomqtt/gateway/etcd/streams"}}"
+rooms = "{{getv "/gomqtt/gateway/etcd/rooms"}}"
+
+[mqtt]
+qos_max = {{getv  "/gomqtt/gateway/qosmax"}}
+
+default_keepalive = {{getv  "/gomqtt/gateway/defaultkeepalive"}}
+min_keepalive = {{getv  "/gomqtt/gateway/minkeepalive"}}
+max_keepalive = {{getv  "/gomqtt/gateway/maxkeepalive"}}
+
+max_user_len = {{getv  "/gomqtt/gateway/maxuserlen"}}
+max_password_len = {{getv  "/gomqtt/gateway/maxpasswordlen"}}
+
+[dispatch]
+addr = "{{getv  "/gomqtt/gateway/dispatch/addr"}}"
+
+[mutex]
+#  the type of mutex login,when is mutex,only one client is allowed to connect to gateway
+# 1: disable mutx login
+# 2: mutex with Username
+# 3: mutex with Username and Appid
+# 4: mutex with ClientID 
+type = {{getv  "/gomqtt/gateway/mutex/type"}}
