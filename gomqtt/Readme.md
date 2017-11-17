@@ -68,3 +68,5 @@ go get github.com/coreos/etcd/clientv3
 go get github.com/nats-io/nats
 go get github.com/naoina/toml
 go get github.com/uber-go/zap
+go get github.com/mailru/easyjson/jlexer
+go get github.com/golang/snappy
