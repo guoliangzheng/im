@@ -64,7 +64,7 @@ Windows        | Yes
 ## 添加依赖
 go get github.com/spf13/cobra
 go get github.com/spf13/viper
-go get github.com/coreos/etcd/clientv3
+go get github.com/coreos/etcd
 go get github.com/nats-io/nats
 go get github.com/naoina/toml
 go get -u github.com/uber-go/zap
@@ -91,3 +91,4 @@ go get github.com/spf13/afero
 go get github.com/spf13/cast
 go get github.com/spf13/jwalterweatherman
 go get gopkg.in/yaml.v2
+go get github.com/smartystreets/go-disruptor

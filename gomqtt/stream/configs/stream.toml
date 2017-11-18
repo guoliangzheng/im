@@ -5,8 +5,7 @@ log_level = "info"
 log_path = "./out.log"
 
 [etcd]
-#addrs = ["127.0.0.1:2379"]
-addrs = []
+addrs = ["127.0.0.1:2300"]
 dltimeout = 10
 rqtimeout = 10
 report_time = 5
@@ -18,4 +17,4 @@ addr = ""
 port = "8389"
 
 [nats]
-addrs = []
+addrs = ["127.0.0.1:42222"]
